@@ -1,132 +1,50 @@
+import {repository} from '@loopback/repository';
 import {
-  Count,
-  CountSchema,
-  Filter,
-  FilterExcludingWhere,
-  repository,
-  Where,
-} from '@loopback/repository';
-import {
-  post,
-  param,
-  get,
-  getModelSchemaRef,
-  patch,
-  put,
   del,
+  getModelSchemaRef,
+  param,
+  post,
+  put,
   requestBody,
   response,
 } from '@loopback/rest';
 import {Revenue} from '../models';
 import {RevenueRepository} from '../repositories';
+import {RevenueOut} from './../models/revenue.model';
 
-export class RevenueController {
+export class Revenues {
   constructor(
     @repository(RevenueRepository)
-    public revenueRepository : RevenueRepository,
+    public revenueRepository: RevenueRepository,
   ) {}
 
-  @post('/revenues')
+  @post('/revenues/{customerID}')
   @response(200, {
     description: 'Revenue model instance',
-    content: {'application/json': {schema: getModelSchemaRef(Revenue)}},
+    content: {'application/json': {schema: getModelSchemaRef(RevenueOut)}},
   })
   async create(
+    @param.path.number('customerID') customerId: number,
     @requestBody({
       content: {
         'application/json': {
           schema: getModelSchemaRef(Revenue, {
             title: 'NewRevenue',
-            exclude: ['id'],
+            exclude: ['id', 'customer_id'],
           }),
         },
       },
     })
     revenue: Omit<Revenue, 'id'>,
-  ): Promise<Revenue> {
-    return this.revenueRepository.create(revenue);
-  }
-
-  @get('/revenues/count')
-  @response(200, {
-    description: 'Revenue model count',
-    content: {'application/json': {schema: CountSchema}},
-  })
-  async count(
-    @param.where(Revenue) where?: Where<Revenue>,
-  ): Promise<Count> {
-    return this.revenueRepository.count(where);
-  }
-
-  @get('/revenues')
-  @response(200, {
-    description: 'Array of Revenue model instances',
-    content: {
-      'application/json': {
-        schema: {
-          type: 'array',
-          items: getModelSchemaRef(Revenue, {includeRelations: true}),
-        },
-      },
-    },
-  })
-  async find(
-    @param.filter(Revenue) filter?: Filter<Revenue>,
-  ): Promise<Revenue[]> {
-    return this.revenueRepository.find(filter);
-  }
-
-  @patch('/revenues')
-  @response(200, {
-    description: 'Revenue PATCH success count',
-    content: {'application/json': {schema: CountSchema}},
-  })
-  async updateAll(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(Revenue, {partial: true}),
-        },
-      },
-    })
-    revenue: Revenue,
-    @param.where(Revenue) where?: Where<Revenue>,
-  ): Promise<Count> {
-    return this.revenueRepository.updateAll(revenue, where);
-  }
-
-  @get('/revenues/{id}')
-  @response(200, {
-    description: 'Revenue model instance',
-    content: {
-      'application/json': {
-        schema: getModelSchemaRef(Revenue, {includeRelations: true}),
-      },
-    },
-  })
-  async findById(
-    @param.path.number('id') id: number,
-    @param.filter(Revenue, {exclude: 'where'}) filter?: FilterExcludingWhere<Revenue>
-  ): Promise<Revenue> {
-    return this.revenueRepository.findById(id, filter);
-  }
-
-  @patch('/revenues/{id}')
-  @response(204, {
-    description: 'Revenue PATCH success',
-  })
-  async updateById(
-    @param.path.number('id') id: number,
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(Revenue, {partial: true}),
-        },
-      },
-    })
-    revenue: Revenue,
-  ): Promise<void> {
-    await this.revenueRepository.updateById(id, revenue);
+  ): Promise<RevenueOut> {
+    revenue.customer_id = customerId;
+    const revenueObj = await this.revenueRepository.create(revenue);
+    const revenueOut: RevenueOut = new RevenueOut();
+    if (revenueObj?.id) {
+      revenueOut.revenue_id = revenueObj.id;
+    }
+    console.log(revenue.getId());
+    return revenueOut;
   }
 
   @put('/revenues/{id}')
@@ -142,7 +60,7 @@ export class RevenueController {
 
   @del('/revenues/{id}')
   @response(204, {
-    description: 'Revenue DELETE success',
+    description: 'Revenues DELETE success',
   })
   async deleteById(@param.path.number('id') id: number): Promise<void> {
     await this.revenueRepository.deleteById(id);

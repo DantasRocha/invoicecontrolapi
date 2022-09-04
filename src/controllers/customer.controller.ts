@@ -1,35 +1,28 @@
+import {repository} from '@loopback/repository';
 import {
-  Count,
-  CountSchema,
-  Filter,
-  FilterExcludingWhere,
-  repository,
-  Where,
-} from '@loopback/repository';
-import {
-  post,
-  param,
   get,
   getModelSchemaRef,
-  patch,
+  param,
+  post,
   put,
-  del,
   requestBody,
   response,
 } from '@loopback/rest';
-import {Customer} from '../models';
-import {CustomerRepository} from '../repositories';
+import {Archives, Customer, CustomerOut} from '../models';
+import {ArchivesRepository, CustomerRepository} from '../repositories';
 
-export class CustomerController {
+export class Customers {
   constructor(
     @repository(CustomerRepository)
-    public customerRepository : CustomerRepository,
+    public customerRepository: CustomerRepository,
+    @repository(ArchivesRepository)
+    public archivesRepository: ArchivesRepository,
   ) {}
 
   @post('/customers')
   @response(200, {
     description: 'Customer model instance',
-    content: {'application/json': {schema: getModelSchemaRef(Customer)}},
+    content: {'application/json': {schema: getModelSchemaRef(CustomerOut)}},
   })
   async create(
     @requestBody({
@@ -43,56 +36,13 @@ export class CustomerController {
       },
     })
     customer: Omit<Customer, 'id'>,
-  ): Promise<Customer> {
-    return this.customerRepository.create(customer);
-  }
-
-  @get('/customers/count')
-  @response(200, {
-    description: 'Customer model count',
-    content: {'application/json': {schema: CountSchema}},
-  })
-  async count(
-    @param.where(Customer) where?: Where<Customer>,
-  ): Promise<Count> {
-    return this.customerRepository.count(where);
-  }
-
-  @get('/customers')
-  @response(200, {
-    description: 'Array of Customer model instances',
-    content: {
-      'application/json': {
-        schema: {
-          type: 'array',
-          items: getModelSchemaRef(Customer, {includeRelations: true}),
-        },
-      },
-    },
-  })
-  async find(
-    @param.filter(Customer) filter?: Filter<Customer>,
-  ): Promise<Customer[]> {
-    return this.customerRepository.find(filter);
-  }
-
-  @patch('/customers')
-  @response(200, {
-    description: 'Customer PATCH success count',
-    content: {'application/json': {schema: CountSchema}},
-  })
-  async updateAll(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(Customer, {partial: true}),
-        },
-      },
-    })
-    customer: Customer,
-    @param.where(Customer) where?: Where<Customer>,
-  ): Promise<Count> {
-    return this.customerRepository.updateAll(customer, where);
+  ): Promise<CustomerOut> {
+    const retorno: CustomerOut = new CustomerOut();
+    customer = await this.customerRepository.create(customer);
+    if (customer?.getId()) {
+      retorno.customer_id = customer.getId();
+    }
+    return retorno;
   }
 
   @get('/customers/{id}')
@@ -104,29 +54,27 @@ export class CustomerController {
       },
     },
   })
-  async findById(
-    @param.path.number('id') id: number,
-    @param.filter(Customer, {exclude: 'where'}) filter?: FilterExcludingWhere<Customer>
-  ): Promise<Customer> {
-    return this.customerRepository.findById(id, filter);
+  async findById(@param.path.number('id') id: number): Promise<Customer> {
+    return this.customerRepository.findById(id);
   }
 
-  @patch('/customers/{id}')
+  @put('/customers/{id}/archives')
   @response(204, {
-    description: 'Customer PATCH success',
+    description: 'Archives PUT success',
   })
-  async updateById(
+  async replaceByCategoriaId(
     @param.path.number('id') id: number,
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(Customer, {partial: true}),
-        },
-      },
-    })
-    customer: Customer,
+    @requestBody() archives: Archives,
   ): Promise<void> {
-    await this.customerRepository.updateById(id, customer);
+    const archivesGetId = await this.archivesRepository.findOne({
+      where: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        categorie_id: id,
+      },
+    });
+    if (archivesGetId?.id) {
+      await this.archivesRepository.replaceById(archivesGetId.id, archives);
+    }
   }
 
   @put('/customers/{id}')
@@ -138,13 +86,5 @@ export class CustomerController {
     @requestBody() customer: Customer,
   ): Promise<void> {
     await this.customerRepository.replaceById(id, customer);
-  }
-
-  @del('/customers/{id}')
-  @response(204, {
-    description: 'Customer DELETE success',
-  })
-  async deleteById(@param.path.number('id') id: number): Promise<void> {
-    await this.customerRepository.deleteById(id);
   }
 }

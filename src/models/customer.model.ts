@@ -11,6 +11,12 @@ export class Customer extends Entity {
   id?: number;
 
   @property({
+    type: 'number',
+    required: true,
+  })
+  user_id: number;
+
+  @property({
     type: 'string',
     required: true,
   })
@@ -38,3 +44,12 @@ export interface CustomerRelations {
 }
 
 export type CustomerWithRelations = Customer & CustomerRelations;
+
+@model()
+export class CustomerOut extends Entity {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  customer_id: number;
+  constructor(data?: Partial<CustomerOut>) {
+    super(data);
+  }
+}

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import {Entity, model, property} from '@loopback/repository';
 
 @model()
@@ -13,12 +14,17 @@ export class Setting extends Entity {
     type: 'string',
     required: true,
   })
-  key: string;
+  max_revenue_amount: number;
   @property({
-    type: 'string',
+    type: 'boolean',
     required: true,
   })
-  value: string;
+  sms_notification: boolean;
+  @property({
+    type: 'boolean',
+    required: true,
+  })
+  email_notification: boolean;
 
   constructor(data?: Partial<Setting>) {
     super(data);

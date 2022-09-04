@@ -1,45 +1,77 @@
 import {service} from '@loopback/core';
-import {get, getModelSchemaRef, param, response} from '@loopback/rest';
-import {InvoiceReport, Invoices} from '../models';
+import {getModelSchemaRef, post, requestBody, response} from '@loopback/rest';
+import {
+  RevenueCustomer,
+  RevenueIn,
+  RevenueMonth,
+  TotalRevenue,
+} from '../models';
 
 import {ReportService} from '../services';
 
-export class ReportController {
+export class Reports {
   constructor(
     @service()
     private reportService: ReportService,
   ) {}
 
-  @get('invoices/{userid}')
+  @post('/total-revenue')
   @response(200, {
-    description: 'instances of Balance',
-    content: {
-      'application/json': {
-        schema: getModelSchemaRef(Invoices, {includeRelations: true}),
-      },
-    },
+    description: 'Reports total revenue',
+    content: {'application/json': {schema: getModelSchemaRef(TotalRevenue)}},
   })
-  async getInvoicesCurrentYear(
-    @param.path.number('userid') userid: number,
-  ): Promise<Invoices> {
-    return this.reportService.getInvoicesCurrentYear(userid);
-  }
-
-  @get('/invoice-report/{userid}')
-  @response(200, {
-    description: 'instances of array InvoiceReport',
-    content: {
-      'application/json': {
-        schema: {
-          type: 'array',
-          items: getModelSchemaRef(InvoiceReport, {includeRelations: true}),
+  async getTotalRevenue(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(RevenueIn, {
+            title: 'NewReports',
+          }),
         },
       },
-    },
+    })
+    revenueIn: RevenueIn,
+  ): Promise<TotalRevenue> {
+    return this.reportService.getTotalRevenueByYearAndUserId(revenueIn);
+  }
+
+  @post('/revenue-by-month')
+  @response(200, {
+    description: 'Reports revenue by month',
+    content: {'application/json': {schema: getModelSchemaRef(RevenueMonth)}},
   })
-  async getCustomerWithInvoicesThisYear(
-    @param.path.number('userid') userid: number,
-  ): Promise<InvoiceReport[]> {
-    return this.reportService.getCustomerWithInvoicesThisYear(userid);
+  async getRevenueByMonthAndUserId(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(RevenueIn, {
+            title: 'NewReports',
+          }),
+        },
+      },
+    })
+    revenueIn: RevenueIn,
+  ): Promise<RevenueMonth> {
+    return this.reportService.getRevenueByMonthAndUserId(revenueIn);
+  }
+
+  @post('/revenue-by-customer')
+  @response(200, {
+    description: 'Reports revenue by customer',
+    content: {'application/json': {schema: getModelSchemaRef(RevenueCustomer)}},
+  })
+  async getRevenueByCustomerAndUserId(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(RevenueIn, {
+            title: 'NewReports',
+          }),
+        },
+      },
+    })
+    revenueIn: RevenueIn,
+  ): Promise<RevenueCustomer> {
+    return this.reportService.getRevenueByCustomerAndUserId(revenueIn);
   }
 }

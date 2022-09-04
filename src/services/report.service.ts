@@ -1,5 +1,6 @@
 import {/* inject, */ BindingScope, injectable, service} from '@loopback/core';
-import {InvoiceReport, Invoices} from '../models';
+import {RevenueIn, RevenueMonth, TotalRevenue} from '../models';
+import {RevenueCustomer} from './../models/report.model';
 
 import {ReportDbService} from './reportDb.service';
 
@@ -10,42 +11,69 @@ export class ReportService {
     public reportDb: ReportDbService,
   ) {}
 
-  private CHAVE_PARAMETRO_VALOR_MAX_MEI = 'CHAVE_PARAMETRO_VALOR_MAX_MEI';
+  private maxRevenueAmount = 'max_revenue_amount';
 
   private async getParameterTransactionLimitMei() {
     let valueMaxMei = 0.0;
-    const valueParameter: string = await this.reportDb.getSettingByKey(
-      this.CHAVE_PARAMETRO_VALOR_MAX_MEI,
-    );
+    const valueParameter: number = await this.reportDb.getSetting();
     if (valueParameter) {
-      valueMaxMei = parseFloat(valueParameter);
+      valueMaxMei = valueParameter;
     }
     return valueMaxMei;
   }
 
-  public async getInvoicesCurrentYear(userid: number): Promise<Invoices> {
-    console.log('-getInvoicesCurrentYear:', userid);
-    const invoices: Invoices = new Invoices();
-    invoices.invoicesLimit = await this.getParameterTransactionLimitMei();
-    invoices.invoicesSum = await this.reportDb.getInvoicesCurrentYear(userid);
-    if (
-      invoices.invoicesLimit &&
-      invoices.invoicesLimit > 0 &&
-      invoices.invoicesSum &&
-      invoices.invoicesSum > 0
-    ) {
-      invoices.invoicesRemaining =
-        invoices.invoicesLimit - invoices.invoicesSum;
-    } else {
-      invoices.invoicesRemaining = 0.0;
+  private validarRevenueIn(revenueIn: RevenueIn): RevenueIn {
+    if (!RevenueIn) {
+      revenueIn.fiscal_year = new Date().getFullYear();
+      revenueIn.user_id = 0;
     }
-    return invoices;
+    if (!revenueIn.fiscal_year || revenueIn.fiscal_year === 0) {
+      revenueIn.fiscal_year = new Date().getFullYear();
+    }
+    if (!revenueIn.user_id) {
+      revenueIn.user_id = 0;
+    }
+    return revenueIn;
   }
 
-  public async getCustomerWithInvoicesThisYear(
-    userid: number,
-  ): Promise<InvoiceReport[]> {
-    console.log('-getCustomerWithInvoicesThisYear:', userid);
-    return this.reportDb.getCustomerWithInvoicesThisYear(userid);
+  public async getTotalRevenueByYearAndUserId(
+    revenueIn: RevenueIn,
+  ): Promise<TotalRevenue> {
+    console.log('-getRevenueByMonthAndUserId:', revenueIn);
+    const totalRevenue: TotalRevenue = new TotalRevenue();
+    revenueIn = this.validarRevenueIn(revenueIn);
+    totalRevenue.max_revenue_amount =
+      await this.getParameterTransactionLimitMei();
+    totalRevenue.total_revenue =
+      await this.reportDb.getTotalRevenueByYearAndUserId(
+        revenueIn.user_id,
+        revenueIn.fiscal_year,
+      );
+    totalRevenue.balance =
+      totalRevenue.max_revenue_amount - totalRevenue.total_revenue;
+
+    return totalRevenue;
+  }
+
+  public async getRevenueByMonthAndUserId(
+    revenueIn: RevenueIn,
+  ): Promise<RevenueMonth> {
+    console.log('-getRevenueByMonthAndUserId:', revenueIn);
+    revenueIn = this.validarRevenueIn(revenueIn);
+    return this.reportDb.getRevenueByMonthAndUserId(
+      revenueIn.user_id,
+      revenueIn.fiscal_year,
+    );
+  }
+
+  public async getRevenueByCustomerAndUserId(
+    revenueIn: RevenueIn,
+  ): Promise<RevenueCustomer> {
+    console.log('-getRevenueByCustomer:', revenueIn);
+    revenueIn = this.validarRevenueIn(revenueIn);
+    return this.reportDb.getRevenueByCustomerAndUserId(
+      revenueIn.user_id,
+      revenueIn.fiscal_year,
+    );
   }
 }

@@ -4,3 +4,4 @@ export * from './customer.repository';
 export * from './expense.repository';
 export * from './revenue.repository';
 export * from './categorie.repository';
+export * from './archives.repository';

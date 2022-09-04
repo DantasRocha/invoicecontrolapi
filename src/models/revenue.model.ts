@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import {model, property} from '@loopback/repository';
+import {Entity, model, property} from '@loopback/repository';
 import {Transaction} from './transaction.model';
 
 @model()
@@ -11,6 +11,14 @@ export class Revenue extends Transaction {
   invoice_id: number;
 
   constructor(data?: Partial<Revenue>) {
+    super(data);
+  }
+}
+
+@model()
+export class RevenueOut extends Entity {
+  revenue_id: number;
+  constructor(data?: Partial<RevenueOut>) {
     super(data);
   }
 }

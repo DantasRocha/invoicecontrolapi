@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import {model, property} from '@loopback/repository';
+import {Entity, model, property} from '@loopback/repository';
 import {Transaction} from './transaction.model';
 
 @model()
@@ -20,3 +20,11 @@ export interface ExpenseRelations {
 }
 
 export type ExpenseWithRelations = Expense & ExpenseRelations;
+
+@model()
+export class ExpenseOut extends Entity {
+  expense_id: number;
+  constructor(data?: Partial<ExpenseOut>) {
+    super(data);
+  }
+}
