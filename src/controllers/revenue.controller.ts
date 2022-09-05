@@ -12,6 +12,8 @@ import {Revenue} from '../models';
 import {RevenueRepository} from '../repositories';
 import {RevenueOut} from './../models/revenue.model';
 
+import {authenticate} from '@loopback/authentication';
+@authenticate('jwt')
 export class Revenues {
   constructor(
     @repository(RevenueRepository)

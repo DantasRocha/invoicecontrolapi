@@ -1,3 +1,4 @@
+import {authenticate} from '@loopback/authentication';
 import {repository} from '@loopback/repository';
 import {
   get,
@@ -8,7 +9,7 @@ import {
 } from '@loopback/rest';
 import {Setting} from '../models';
 import {SettingRepository} from '../repositories';
-
+@authenticate('jwt')
 export class Settings {
   constructor(
     @repository(SettingRepository)

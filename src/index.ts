@@ -1,4 +1,5 @@
 import {ApplicationConfig, InvoicecontrolApplication} from './application';
+import './env';
 
 export * from './application';
 
@@ -19,6 +20,7 @@ if (require.main === module) {
     rest: {
       port: +(process.env.PORT ?? 3001),
       host: process.env.HOST,
+      basePath: process.env.BASE_PATH ?? '/',
       // The `gracePeriodForClose` provides a graceful close for http/https
       // servers with keep-alive clients. The default value is `Infinity`
       // (don't force-close). If you want to immediately destroy all sockets
@@ -30,6 +32,14 @@ if (require.main === module) {
         setServersFromRequest: true,
       },
     },
+
+    // firebase: {
+    //   projectId: process.env.FIREBASE_PROJECT_ID,
+    // },
+    // jwt: {
+    //   secret: process.env.JWT_SECRET ?? 'UzNWclFIRjFhU1pJUUhJNVlRbz0K',
+    //   expiresIn: process.env.JWT_EXPIRES_IN ?? '1h',
+    // },
   };
   main(config).catch(err => {
     console.error('Cannot start the application.', err);

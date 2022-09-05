@@ -11,6 +11,8 @@ import {
 import {ReturnUser, User} from '../models';
 import {UserRepository} from '../repositories';
 
+import {authenticate} from '@loopback/authentication';
+@authenticate('jwt')
 export class Users {
   constructor(
     @repository(UserRepository)

@@ -21,6 +21,10 @@ export class Credentials extends Entity {
 
 @model()
 export class FirebaseToken extends Entity {
+  @property({
+    type: 'string',
+    required: true,
+  })
   token: string;
   constructor(data?: Partial<FirebaseToken>) {
     super(data);

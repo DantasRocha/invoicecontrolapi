@@ -11,6 +11,8 @@ import {
 import {Expense, ExpenseOut} from '../models';
 import {ExpenseRepository} from '../repositories';
 
+import {authenticate} from '@loopback/authentication';
+@authenticate('jwt')
 export class Expenses {
   constructor(
     @repository(ExpenseRepository)

@@ -1,3 +1,4 @@
+import {authenticate} from '@loopback/authentication';
 import {repository} from '@loopback/repository';
 import {
   get,
@@ -11,6 +12,7 @@ import {
 import {Archives, Customer, CustomerOut} from '../models';
 import {ArchivesRepository, CustomerRepository} from '../repositories';
 
+@authenticate('jwt')
 export class Customers {
   constructor(
     @repository(CustomerRepository)

@@ -1,8 +1,9 @@
+import {authenticate} from '@loopback/authentication';
 import {repository} from '@loopback/repository';
 import {param, put, requestBody, response} from '@loopback/rest';
 import {Archives, Categorie} from '../models';
 import {ArchivesRepository, CategorieRepository} from '../repositories';
-
+@authenticate('jwt')
 export class Categories {
   constructor(
     @repository(CategorieRepository)

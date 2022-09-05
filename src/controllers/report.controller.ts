@@ -9,6 +9,8 @@ import {
 
 import {ReportService} from '../services';
 
+import {authenticate} from '@loopback/authentication';
+@authenticate('jwt')
 export class Reports {
   constructor(
     @service()
