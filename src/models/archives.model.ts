@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import {Entity, model, property} from '@loopback/repository';
 
 @model()
@@ -17,14 +18,13 @@ export class Archives extends Entity {
   @property({
     type: 'number',
   })
-  categorie_id?: number;
+  categoria_id?: number;
 
   @property({
     type: 'string',
     required: true,
   })
   url: string;
-
 
   constructor(data?: Partial<Archives>) {
     super(data);

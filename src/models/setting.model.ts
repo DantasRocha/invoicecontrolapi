@@ -11,7 +11,7 @@ export class Setting extends Entity {
   id?: number;
 
   @property({
-    type: 'string',
+    type: 'number',
     required: true,
   })
   max_revenue_amount: number;

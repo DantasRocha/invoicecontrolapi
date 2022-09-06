@@ -39,12 +39,9 @@ export class Users {
     })
     userNew: Omit<User, 'id'>,
   ): Promise<ReturnUser> {
-    const returnUser: ReturnUser = new ReturnUser();
-    returnUser.user_id = 0;
     const user = await this.userRepository.create(userNew);
-    if (user?.id) {
-      returnUser.user_id = user.id;
-    }
+    const returnUser: ReturnUser = new ReturnUser();
+    returnUser.user_id = user.id;
     return returnUser;
   }
 
@@ -71,7 +68,17 @@ export class Users {
   })
   async replaceById(
     @param.path.number('id') id: number,
-    @requestBody() user: User,
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(User, {
+            title: 'NewUser',
+            exclude: ['password'],
+          }),
+        },
+      },
+    })
+    user: User,
   ): Promise<void> {
     await this.userRepository.replaceById(id, user);
   }

@@ -6,9 +6,8 @@ import {Transaction} from './transaction.model';
 export class Expense extends Transaction {
   @property({
     type: 'number',
-    required: true,
   })
-  categorie_id: number;
+  categorie_id?: number;
 
   constructor(data?: Partial<Expense>) {
     super(data);
@@ -23,7 +22,10 @@ export type ExpenseWithRelations = Expense & ExpenseRelations;
 
 @model()
 export class ExpenseOut extends Entity {
-  expense_id: number;
+  @property({
+    type: 'number',
+  })
+  expense_id?: number;
   constructor(data?: Partial<ExpenseOut>) {
     super(data);
   }

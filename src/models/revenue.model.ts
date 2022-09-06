@@ -17,7 +17,10 @@ export class Revenue extends Transaction {
 
 @model()
 export class RevenueOut extends Entity {
-  revenue_id: number;
+  @property({
+    type: 'number',
+  })
+  revenue_id?: number;
   constructor(data?: Partial<RevenueOut>) {
     super(data);
   }

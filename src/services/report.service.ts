@@ -1,26 +1,20 @@
 import {/* inject, */ BindingScope, injectable, service} from '@loopback/core';
+import {repository} from '@loopback/repository';
 import {RevenueIn, RevenueMonth, TotalRevenue} from '../models';
+import {SettingRepository} from '../repositories';
 import {RevenueCustomer} from './../models/report.model';
 
 import {ReportDbService} from './reportDb.service';
+import {SingletonSetting} from './singleton.settings';
 
 @injectable({scope: BindingScope.TRANSIENT})
 export class ReportService {
   constructor(
     @service()
     public reportDb: ReportDbService,
+    @repository(SettingRepository)
+    private settingRepository: SettingRepository,
   ) {}
-
-  private maxRevenueAmount = 'max_revenue_amount';
-
-  private async getParameterTransactionLimitMei() {
-    let valueMaxMei = 0.0;
-    const valueParameter: number = await this.reportDb.getSetting();
-    if (valueParameter) {
-      valueMaxMei = valueParameter;
-    }
-    return valueMaxMei;
-  }
 
   private validarRevenueIn(revenueIn: RevenueIn): RevenueIn {
     if (!RevenueIn) {
@@ -39,11 +33,13 @@ export class ReportService {
   public async getTotalRevenueByYearAndUserId(
     revenueIn: RevenueIn,
   ): Promise<TotalRevenue> {
-    console.log('-getRevenueByMonthAndUserId:', revenueIn);
     const totalRevenue: TotalRevenue = new TotalRevenue();
     revenueIn = this.validarRevenueIn(revenueIn);
+    const objSingletonSetting = SingletonSetting.getInstance();
     totalRevenue.max_revenue_amount =
-      await this.getParameterTransactionLimitMei();
+      await objSingletonSetting.getParameterTransactionLimitMei(
+        this.settingRepository,
+      );
     totalRevenue.total_revenue =
       await this.reportDb.getTotalRevenueByYearAndUserId(
         revenueIn.user_id,
@@ -58,22 +54,14 @@ export class ReportService {
   public async getRevenueByMonthAndUserId(
     revenueIn: RevenueIn,
   ): Promise<RevenueMonth> {
-    console.log('-getRevenueByMonthAndUserId:', revenueIn);
     revenueIn = this.validarRevenueIn(revenueIn);
-    return this.reportDb.getRevenueByMonthAndUserId(
-      revenueIn.user_id,
-      revenueIn.fiscal_year,
-    );
+    return this.reportDb.getRevenueByMonthAndUserId(revenueIn);
   }
 
   public async getRevenueByCustomerAndUserId(
     revenueIn: RevenueIn,
   ): Promise<RevenueCustomer> {
-    console.log('-getRevenueByCustomer:', revenueIn);
     revenueIn = this.validarRevenueIn(revenueIn);
-    return this.reportDb.getRevenueByCustomerAndUserId(
-      revenueIn.user_id,
-      revenueIn.fiscal_year,
-    );
+    return this.reportDb.getRevenueByCustomerAndUserId(revenueIn);
   }
 }

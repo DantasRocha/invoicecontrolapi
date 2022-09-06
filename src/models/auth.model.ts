@@ -41,7 +41,10 @@ export class Token extends Entity {
 
 @model()
 export class ReturnUser extends Entity {
-  user_id: number;
+  @property({
+    type: 'number',
+  })
+  user_id?: number;
   constructor(data?: Partial<ReturnUser>) {
     super(data);
   }

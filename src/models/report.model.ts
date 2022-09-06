@@ -131,3 +131,18 @@ export class RevenueMonth extends Model {
     super(data);
   }
 }
+
+export class RevenueOut {
+  month: number;
+  month_name: string;
+  month_revenue: number;
+
+  customer_id: number;
+  customer_name: string;
+  revenue: number;
+}
+
+export enum TypeReport {
+  Month = 'Month',
+  Customer = 'Customer',
+}

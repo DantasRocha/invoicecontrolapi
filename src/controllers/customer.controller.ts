@@ -40,10 +40,8 @@ export class Customers {
     customer: Omit<Customer, 'id'>,
   ): Promise<CustomerOut> {
     const retorno: CustomerOut = new CustomerOut();
-    customer = await this.customerRepository.create(customer);
-    if (customer?.getId()) {
-      retorno.customer_id = customer.getId();
-    }
+    const customerCorrente = await this.customerRepository.create(customer);
+    retorno.customer_id = customerCorrente.id;
     return retorno;
   }
 
@@ -66,12 +64,22 @@ export class Customers {
   })
   async replaceByCategoriaId(
     @param.path.number('id') id: number,
-    @requestBody() archives: Archives,
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(Archives, {
+            title: 'PutCategoriaArchives',
+            exclude: ['id', 'customer_id'],
+          }),
+        },
+      },
+    })
+    archives: Archives,
   ): Promise<void> {
     const archivesGetId = await this.archivesRepository.findOne({
       where: {
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        categorie_id: id,
+        customer_id: id,
       },
     });
     if (archivesGetId?.id) {

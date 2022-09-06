@@ -29,7 +29,7 @@ export class JWTStrategy implements AuthenticationStrategy {
       throw new HttpErrors.Unauthorized('Authorization is missing');
     }
     const authHeaderValue = request.headers.authorization;
-    console.log('-extractCredentials:', authHeaderValue);
+
     // authorization : Bearer xxxx.yyyy.zzzz
     if (!authHeaderValue.startsWith('Bearer')) {
       throw new HttpErrors.Unauthorized(

@@ -1,6 +1,12 @@
 import {authenticate} from '@loopback/authentication';
 import {repository} from '@loopback/repository';
-import {param, put, requestBody, response} from '@loopback/rest';
+import {
+  getModelSchemaRef,
+  param,
+  put,
+  requestBody,
+  response,
+} from '@loopback/rest';
 import {Archives, Categorie} from '../models';
 import {ArchivesRepository, CategorieRepository} from '../repositories';
 @authenticate('jwt')
@@ -18,14 +24,25 @@ export class Categories {
   })
   async replaceByCategoriaId(
     @param.path.number('id') id: number,
-    @requestBody() archives: Archives,
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(Archives, {
+            title: 'PutCategoriaArchives',
+            exclude: ['id', 'customer_id'],
+          }),
+        },
+      },
+    })
+    archives: Archives,
   ): Promise<void> {
     const archivesGetId = await this.archivesRepository.findOne({
       where: {
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        categorie_id: id,
+        categoria_id: id,
       },
     });
+
     if (archivesGetId?.id) {
       await this.archivesRepository.replaceById(archivesGetId.id, archives);
     }
@@ -37,7 +54,17 @@ export class Categories {
   })
   async replaceById(
     @param.path.number('id') id: number,
-    @requestBody() categorie: Categorie,
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(Categorie, {
+            title: 'PutCategoria',
+            exclude: ['id'],
+          }),
+        },
+      },
+    })
+    categorie: Categorie,
   ): Promise<void> {
     await this.categorieRepository.replaceById(id, categorie);
   }

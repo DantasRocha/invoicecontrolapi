@@ -48,7 +48,12 @@ export type CustomerWithRelations = Customer & CustomerRelations;
 @model()
 export class CustomerOut extends Entity {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  customer_id: number;
+  @property({
+    type: 'number',
+    id: true,
+    generated: true,
+  })
+  customer_id?: number;
   constructor(data?: Partial<CustomerOut>) {
     super(data);
   }

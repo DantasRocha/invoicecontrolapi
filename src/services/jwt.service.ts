@@ -16,7 +16,6 @@ export class JWTService {
   public readonly expiresSecret: string;
 
   async generateToken(userProfile: UserProfile): Promise<string> {
-    console.log('gtok');
     if (!userProfile) {
       throw new HttpErrors.Unauthorized(
         'Error while generating token :userProfile is null',
@@ -34,7 +33,6 @@ export class JWTService {
   }
 
   async verifyToken(token: string): Promise<UserProfile> {
-    console.log('verifyToken');
     if (!token) {
       throw new HttpErrors.Unauthorized(
         `Error verifying token:'token' is null`,

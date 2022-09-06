@@ -8,9 +8,9 @@ import {
   requestBody,
   response,
 } from '@loopback/rest';
-import {Revenue} from '../models';
+
 import {RevenueRepository} from '../repositories';
-import {RevenueOut} from './../models/revenue.model';
+import {Revenue, RevenueOut} from './../models/revenue.model';
 
 import {authenticate} from '@loopback/authentication';
 @authenticate('jwt')
@@ -42,10 +42,7 @@ export class Revenues {
     revenue.customer_id = customerId;
     const revenueObj = await this.revenueRepository.create(revenue);
     const revenueOut: RevenueOut = new RevenueOut();
-    if (revenueObj?.id) {
-      revenueOut.revenue_id = revenueObj.id;
-    }
-    console.log(revenue.getId());
+    revenueOut.revenue_id = revenueObj.id;
     return revenueOut;
   }
 

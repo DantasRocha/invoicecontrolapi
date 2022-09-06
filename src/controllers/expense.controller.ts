@@ -19,7 +19,7 @@ export class Expenses {
     public expenseRepository: ExpenseRepository,
   ) {}
 
-  @post('/expenses/categoryID')
+  @post('/expenses/{categoryID}')
   @response(200, {
     description: 'Expense model instance',
     content: {'application/json': {schema: getModelSchemaRef(ExpenseOut)}},
@@ -40,10 +40,8 @@ export class Expenses {
   ): Promise<ExpenseOut> {
     expense.categorie_id = categorieId;
     const expenseOut: ExpenseOut = new ExpenseOut();
-    expense = await this.expenseRepository.create(expense);
-    if (expense) {
-      expenseOut.expense_id = expense.getId();
-    }
+    const expenseC = await this.expenseRepository.create(expense);
+    expenseOut.expense_id = expenseC.id;
     return expenseOut;
   }
 

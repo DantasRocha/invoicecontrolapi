@@ -1,4 +1,4 @@
-import {RevenueCustomerItemTemp} from './../models/report.model';
+import {RevenueIn, RevenueOut, TypeReport} from './../models/report.model';
 /* eslint-disable @typescript-eslint/naming-convention */
 import {/* inject, */ BindingScope, injectable} from '@loopback/core';
 import {repository} from '@loopback/repository';
@@ -7,9 +7,9 @@ import {
   RevenueCustomer,
   RevenueCustomerItem,
   RevenueMonthItem,
-  RevenueMonthItemTemp,
 } from '../models/report.model';
 import {RevenueRepository, SettingRepository} from '../repositories';
+import {IReport, ReportFactory} from './factory.report';
 
 @injectable({scope: BindingScope.TRANSIENT})
 export class ReportDbService {
@@ -70,39 +70,33 @@ export class ReportDbService {
   }
 
   public async getRevenueByMonthAndUserId(
-    userid: number,
-    fiscalYear: number,
+    param: RevenueIn,
   ): Promise<RevenueMonth> {
     const revenueMonth: RevenueMonth = new RevenueMonth();
     revenueMonth.revenue = [];
     revenueMonth.max_revenue_amount = 0;
-
-    const strQuery = `SELECT   date_part('month', transaction_date) as transaction_month,
-                      sum(amount) as sum_amount
-                      FROM revenue
-                      where user_id=$1
-                      and date_part('year', transaction_date) = $2
-                      group by transaction_month`;
+    let max_revenue_amount: number = 0 as number;
 
     try {
-      const result = await this.revenueRepository.execute(strQuery, [
-        userid,
-        fiscalYear,
-      ]);
+      const report: IReport = ReportFactory.createObject(TypeReport.Month);
+      const result = await report.getReport(this.revenueRepository, param);
 
       if (result !== undefined && result.length > 0) {
-        console.log('-getRevenueByMonthAndUserId:', result);
         let revenueItem: RevenueMonthItem = new RevenueMonthItem();
-        result.forEach((item: RevenueMonthItemTemp) => {
+        result.forEach((item: RevenueOut) => {
           revenueItem = new RevenueMonthItem();
-          revenueItem.month = item.transaction_month;
-          revenueItem.month_name = this.getMonthName(item.transaction_month);
-          revenueItem.month_revenue = item.sum_amount;
-          revenueMonth.max_revenue_amount =
-            revenueMonth.max_revenue_amount + revenueItem.month_revenue;
+          revenueItem.month = item.month;
+          revenueItem.month_name = this.getMonthName(item.month);
+          revenueItem.month_revenue = parseFloat(item.month_revenue.toString());
+          max_revenue_amount = this.sumNumber(
+            parseFloat(max_revenue_amount.toString()),
+            parseFloat(revenueItem.month_revenue.toString()),
+          );
+
           revenueMonth.revenue.push(revenueItem);
         });
       }
+      revenueMonth.max_revenue_amount = max_revenue_amount;
     } catch (error) {
       console.log('-erro:', error);
     }
@@ -110,43 +104,40 @@ export class ReportDbService {
     return revenueMonth;
   }
 
+  private sumNumber(num1: number, num2: number): number {
+    let retorno = 0.0 as number;
+    retorno = (num1 + num2) as number;
+    return retorno;
+  }
+
   public async getRevenueByCustomerAndUserId(
-    userid: number,
-    fiscalYear: number,
+    param: RevenueIn,
   ): Promise<RevenueCustomer> {
     const revenueCustomer: RevenueCustomer = new RevenueCustomer();
     revenueCustomer.max_revenue_amount = 0;
-
-    const strQuery = ` SELECT customer_id as customerId,customer.comercial_name as customer_name,
-                       sum(amount) as sum_amount
-                       FROM revenue inner join customer on revenue.customer_id=customer.id
-                       and revenue.user_id= customer_id
-                       where revenue.user_id=$1
-                       and date_part('year', transaction_date) = $2
-                       group by customerId,customer_name
-                       order by customer_name;`;
+    let max_revenue_amount: number = 0 as number;
 
     try {
-      const result = await this.revenueRepository.execute(strQuery, [
-        userid,
-        fiscalYear,
-      ]);
+      const report: IReport = ReportFactory.createObject(TypeReport.Customer);
+      const result = await report.getReport(this.revenueRepository, param);
 
       if (result !== undefined && result.length > 0) {
-        console.log('-getRevenueByCustomer:', result);
         let revenue: RevenueCustomerItem = new RevenueCustomerItem();
         revenueCustomer.revenue = [];
         revenueCustomer.max_revenue_amount = 0;
-        result.forEach((item: RevenueCustomerItemTemp) => {
+        result.forEach((item: RevenueOut) => {
           revenue = new RevenueCustomerItem();
           revenue.customer_id = item.customer_id;
           revenue.customer_name = item.customer_name;
-          revenue.revenue = item.sum_amount;
+          revenue.revenue = parseFloat(item.revenue.toString());
           revenueCustomer.revenue.push(revenue);
-          revenueCustomer.max_revenue_amount =
-            revenueCustomer.max_revenue_amount + revenue.revenue;
+          max_revenue_amount = this.sumNumber(
+            parseFloat(max_revenue_amount.toString()),
+            parseFloat(revenue.revenue.toString()),
+          );
         });
       }
+      revenueCustomer.max_revenue_amount = max_revenue_amount as number;
     } catch (error) {
       console.log('-erro:', error);
     }
