@@ -31,19 +31,14 @@ Padroes dw projeto:(Deu para explicitar )
     - injeççao de dependencia -> src/services/
     - Princípio de responsabilidade única -> src/services/
 
-
-Tive 2 dúvidas:
-1- referente ao SSO onde usi um mock so para exemplificar
-2-referente a um endpoint no escopo que faz referência a um archives, tomei como verdade que se tratava de uma tabela externa qu e contos a URL do arquivo.
-
-
 ```
 
-## Descrição
+## Projetos / Dependencias
 
 ```
-invoicecontrolapi
-invoicecontrolinfra
+-invoicecontrolApi - Descritivo
+-invoicecontrolApi - DevOps infra estrutura e banco de dados , docker
+-invoicecontrolInfra - Api projeto
 
 ```
 
@@ -72,11 +67,14 @@ yarn start
 ## Tests
 
 ```sh
-yarn test
+Coleção do postman anexa no projeto invoicecontrol
+cd..
+cd invoicecontrol
+VibbraTest.postman_collection.json
 
 ```
 
-## Run the application
+## Trello atividades
 
 ```sh
 
@@ -106,5 +104,12 @@ yarn test
 #26-Rel item por mes
 #27-Alterar nome reports
 #28-revenue-by-month,reports/total-revenue
+
+```
+
+## Video Projeto execultaldo
+
+```sh
+ https://www.youtube.com/watch?v=asBUKIQANP4
 
 ```
